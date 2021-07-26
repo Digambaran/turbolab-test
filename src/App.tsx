@@ -1,15 +1,13 @@
-import {
-  Button,
-  Col,
-  DatePicker, Input, Row
-} from "antd";
+import { Button, Col, DatePicker, Input, Row } from "antd";
 import Layout, { Content, Footer, Header } from "antd/lib/layout/layout";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import "./App.css";
 import DisplayNews from "./Components/DisplayNews";
 import ListNews from "./Components/ListNews";
-import moment from "moment";
+import moment, { Moment } from "moment";
+// import type {RangeValue} from 'moment/src/lib/utils/interface'
+import { RangeValue } from "rc-picker/lib/interface";
 export interface NewsObject {
   date: String;
   sentiment: String;
@@ -21,17 +19,33 @@ export interface NewsObject {
   child_classification: String;
   publication: String;
 }
+declare type queryObject = {
+  start_date?: string;
+  end_date?: string;
+  sentiment?: string;
+  /**
+   * query string
+   */
+  q?: string;
 
+  source_id?: string;
+  category_id?: string;
+};
+const baseURL = "https://get.scrapehero.com/news-api/news/";
 const KEY = "IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
-var x =
-  "https://get.scrapehero.com/news-api/news/?q=Iphone&sentiment=Positive&start_date=2020-12-01&end_date=2020-12-03&source_id=277%2C4171&category_id=13010000%2C04018000&x-api-key=IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
+
 function App() {
+  const [query, setQuery] = useState<queryObject>({});
   const [selectedNews, setSelectedNews] = useState<null | NewsObject>(null);
   const { isLoading, error, data, status } = useQuery(
-    "allnews",
+    ["allnews", query],
     async () => {
       const response = await fetch(
-        "https://get.scrapehero.com/news-api/news/?x-api-key=IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE"
+        serialize(query, baseURL),
+        {
+          mode: "cors",
+        }
+        // "https://get.scrapehero.com/news-api/news/?IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE"
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -42,12 +56,40 @@ function App() {
     { staleTime: 120 * 1000 }
   );
 
-  console.log(data);
+  //get stored filters
+  useEffect(() => {
+    const recorveredFilter = localStorage.getItem("filters");
+    const filters: queryObject | {} = recorveredFilter
+      ? JSON.parse(recorveredFilter)
+      : {};
+    setQuery(filters);
+  }, []);
+
+  //handle daterange
+  const dateFormatString = "YYYY-MM-DD";
+  /**
+   * Get the start and end date and set start_date and end_date fields in query object
+   * @param values An array of moment objects
+   */
+  const onDateRangeChange = (values: RangeValue<Moment>): void => {
+    const start_date = values?.[0];
+    const end_date = values?.[1];
+    setQuery((prevState) => ({
+      ...prevState,
+      start_date: start_date?.format(dateFormatString),
+      end_date: end_date?.format(dateFormatString),
+    }));
+  };
 
   //set the first news to display
   useEffect(() => {
     status === "success" && setSelectedNews(data.result.data[0]);
   }, [status, data]);
+
+  useEffect(() => {
+    localStorage.setItem("filters", JSON.stringify(query));
+  }, [query]);
+console.log(query);
 
   return (
     <Layout>
@@ -65,9 +107,17 @@ function App() {
       <Content>
         <Row>
           <Col span={6} style={{ borderRight: "1px solid rgba(0,0,0,0.06)" }}>
-            <DatePicker.RangePicker></DatePicker.RangePicker>
+            <DatePicker.RangePicker
+            //at the moment default values are not set FIX
+              defaultValue={(query.start_date && query.end_date )?[
+                moment(query.start_date, dateFormatString),
+                moment(query.end_date, dateFormatString),
+              ]:undefined}
+              format={dateFormatString}
+              onChange={onDateRangeChange}
+            ></DatePicker.RangePicker>
             <ListNews
-              data={isLoading?[]:data.result.data}
+              data={isLoading ? [] : data.result.data}
               setSelectedNews={setSelectedNews}
             />
           </Col>
@@ -84,25 +134,20 @@ function App() {
 // serialize({q})
 export default App;
 
-declare type queryObject = {
-  start_date: String;
-  end_date: String;
-  sentiment: String;
-  /**
-   * query string
-   */
-  q: String;
+const serialize = <T extends Record<string, string>>(
+  obj: T,
+  base: string
+): string => {
+  let str = base + "?x-api-key=IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
 
-  source_id: String;
-  category_id: String;
-};
-const serialize = (obj: queryObject): String => {
-  let str = "";
-  for (let key in obj) {
-    if (str !== "") {
-      str += "&";
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const element = obj[key];
+      if (str !== "") {
+        str += "&";
+      }
+      str += key + "=" + encodeURIComponent(element);
     }
-    // str += key + "=" + encodeURIComponent(obj[key]);
   }
   return str;
 };
