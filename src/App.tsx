@@ -1,4 +1,4 @@
-import { Button, Col, DatePicker, Input, Row } from "antd";
+import { Button, Col, DatePicker, Input, Modal, Row } from "antd";
 import Layout, { Content, Footer, Header } from "antd/lib/layout/layout";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -8,6 +8,7 @@ import ListNews from "./Components/ListNews";
 import moment, { Moment } from "moment";
 // import type {RangeValue} from 'moment/src/lib/utils/interface'
 import { RangeValue } from "rc-picker/lib/interface";
+import SearchForm  from "./Components/SearchForm/";
 export interface NewsObject {
   date: String;
   sentiment: String;
@@ -35,18 +36,19 @@ const baseURL = "https://get.scrapehero.com/news-api/news/";
 const KEY = "IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
 
 function App() {
-  const [query, setQuery] = useState<queryObject>({});
+  const [visible, setVisible] = useState<boolean>(false);
+  const [query, setQuery] = useState<queryObject>(()=>{
+    const recorveredFilter = localStorage.getItem("filters");
+    const filters: queryObject | {} = recorveredFilter
+      ? JSON.parse(recorveredFilter)
+      : {};
+      return filters
+  });
   const [selectedNews, setSelectedNews] = useState<null | NewsObject>(null);
   const { isLoading, error, data, status } = useQuery(
     ["allnews", query],
     async () => {
-      const response = await fetch(
-        serialize(query, baseURL),
-        {
-          mode: "cors",
-        }
-        // "https://get.scrapehero.com/news-api/news/?IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE"
-      );
+      const response = await fetch(serialize(query, baseURL));
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -57,14 +59,28 @@ function App() {
   );
 
   //get stored filters
-  useEffect(() => {
-    const recorveredFilter = localStorage.getItem("filters");
-    const filters: queryObject | {} = recorveredFilter
-      ? JSON.parse(recorveredFilter)
-      : {};
-    setQuery(filters);
-  }, []);
+  // useEffect(() => {
+  //   const recorveredFilter = localStorage.getItem("filters");
+  //   const filters: queryObject | {} = recorveredFilter
+  //     ? JSON.parse(recorveredFilter)
+  //     : {};
+  //   setQuery(filters);
+  // }, []);
 
+  //handle search
+  const handleSearch=(value:string):void=>{
+    console.log('search term',value==="");
+    //when user clears search term, remove it from query object
+    if(value===""){
+      setQuery((prevState)=>{
+        const {q,...newState}=prevState;
+        return newState;
+      })
+    }
+    else{
+      setQuery((prevState)=>({...prevState,q:value}));
+    }
+  }
   //handle daterange
   const dateFormatString = "YYYY-MM-DD";
   /**
@@ -86,48 +102,60 @@ function App() {
     status === "success" && setSelectedNews(data.result.data[0]);
   }, [status, data]);
 
+  //write query to localstorage on query change
   useEffect(() => {
     localStorage.setItem("filters", JSON.stringify(query));
   }, [query]);
-console.log(query);
 
   return (
-    <Layout>
-      <Header style={{ background: "#ffffff" }}>
-        <Row>
-          <Col span={8}>
-            <h1>News Reader</h1>
-          </Col>
-          <Col>
-            <Input className="ant-col-12" type="search"></Input>
-            <Button>Advanced search</Button>
-          </Col>
-        </Row>
-      </Header>
-      <Content>
-        <Row>
-          <Col span={6} style={{ borderRight: "1px solid rgba(0,0,0,0.06)" }}>
-            <DatePicker.RangePicker
-            //at the moment default values are not set FIX
-              defaultValue={(query.start_date && query.end_date )?[
-                moment(query.start_date, dateFormatString),
-                moment(query.end_date, dateFormatString),
-              ]:undefined}
-              format={dateFormatString}
-              onChange={onDateRangeChange}
-            ></DatePicker.RangePicker>
-            <ListNews
-              data={isLoading ? [] : data.result.data}
-              setSelectedNews={setSelectedNews}
-            />
-          </Col>
-          <Col span={18}>
-            <DisplayNews data={selectedNews} isLoading={isLoading} />
-          </Col>
-        </Row>
-      </Content>
-      <Footer>footer here</Footer>
-    </Layout>
+    <>
+    <SearchForm show={visible} setShow={setVisible}/>
+      <Layout>
+        <Header style={{ background: "#ffffff" }}>
+          <Row>
+            <Col span={6}>
+              <h1>News Reader</h1>
+            </Col>
+            <Col span={16}>
+              <Input.Search
+              defaultValue={query.q || undefined}
+                className="ant-col ant-col-10"
+                allowClear
+                type="search"
+                onSearch={handleSearch}
+              ></Input.Search>
+              <Button onClick={() => setVisible(true)}>Advanced search</Button>
+            </Col>
+          </Row>
+        </Header>
+        <Content>
+          <Row>
+            <Col span={6} style={{ borderRight: "1px solid rgba(0,0,0,0.06)" }}>
+              <DatePicker.RangePicker
+                //at the moment default values are not set FIX
+                defaultValue={
+                   query.start_date && query.end_date ?
+                   [
+                    moment(query.start_date, dateFormatString),
+                    moment(query.end_date, dateFormatString),
+                  ]:undefined
+                }
+                format={dateFormatString}
+                onChange={onDateRangeChange}
+              ></DatePicker.RangePicker>
+              <ListNews
+                data={isLoading ? [] : data.result.data}
+                setSelectedNews={setSelectedNews}
+              />
+            </Col>
+            <Col span={18}>
+              <DisplayNews data={selectedNews} isLoading={isLoading} />
+            </Col>
+          </Row>
+        </Content>
+        <Footer>footer here</Footer>
+      </Layout>
+    </>
   );
 }
 
