@@ -1,19 +1,31 @@
-import { Modal, Form, Input, Radio } from "antd";
+import { Modal, Form, Input, Radio, Button, Select, Space } from "antd";
 import React, { Dispatch } from "react";
+import { useQuery } from "react-query";
 
 export interface SearchFormProps {
   // query:Object;
   show: boolean;
   setShow: Dispatch<React.SetStateAction<boolean>>;
+  categoriesQuery:any; 
+  sourcesQuery:any;
 }
 
-export const SearchForm = ({ show, setShow }: SearchFormProps): JSX.Element => {
+export const SearchForm = ({
+  show,
+  setShow,
+  categoriesQuery,
+  sourcesQuery,
+}: SearchFormProps): JSX.Element => {
   const [form] = Form.useForm();
+  
+  console.log(categoriesQuery.data, sourcesQuery.data);
+
+  const handleSelectChange = (v: string[]) => console.log(v, "selectchanges");
   return (
     <Modal
       visible={show}
-      title="Create a new collection"
-      okText="Create"
+      title="Advanced Search"
+      okText="Show Results"
       cancelText="Cancel"
       onCancel={() => setShow(false)}
       onOk={() => {
@@ -23,7 +35,6 @@ export const SearchForm = ({ show, setShow }: SearchFormProps): JSX.Element => {
             form.resetFields();
             // onCreate(values);
             console.log(values);
-            
           })
           .catch((info) => {
             console.log("Validate Failed:", info);
@@ -32,33 +43,91 @@ export const SearchForm = ({ show, setShow }: SearchFormProps): JSX.Element => {
     >
       <Form
         form={form}
-        layout="vertical"
-        name="form_in_modal"
-        initialValues={{ modifier: "public" }}
+        name="dynamic_form_item"
+        onFinish={(values) => console.log(values)}
       >
-        <Form.Item
-          name="title"
-          label="Title"
-          rules={[
-            {
-              required: true,
-              message: "Please input the title of collection!",
-            },
-          ]}
+        <Form.List
+          name="filters"
+          // rules={[
+          //   {
+          //     validator: async (_, filters) => {
+          //       if (!filters || filters.length < 2) {
+          //         return Promise.reject(new Error("At least 2 passengers"));
+          //       }
+          //     },
+          //   },
+          // ]}
         >
-          <Input />
-        </Form.Item>
-        <Form.Item name="description" label="Description">
-          <Input type="textarea" />
-        </Form.Item>
-        <Form.Item
-          name="modifier"
-          className="collection-create-form_last-form-item"
-        >
-          <Radio.Group>
-            <Radio value="public">Public</Radio>
-            <Radio value="private">Private</Radio>
-          </Radio.Group>
+          {(fields, { add, remove }, { errors }) => (
+            <>
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  style={{ width: "60%" }}
+                >
+                  Add field
+                </Button>
+
+                {/* <Form.ErrorList errors={errors} /> */}
+              </Form.Item>
+              {fields.map(({ fieldKey, name, key, ...restField }, index) => (
+                <Space
+                  key={key}
+                  style={{ display: "flex", marginBottom: 8 }}
+                  align="baseline"
+                >
+                  <Form.Item
+                    {...restField}
+                    validateTrigger={["onChange", "onBlur"]}
+                    // rules={[
+                    //   {
+                    //     required: true,
+                    //     whitespace: true,
+                    //     message:
+                    //       "Please input passenger's name or delete this field.",
+                    //   },
+                    // ]}
+                    name={[name, "filterKey"]}
+                    fieldKey={[fieldKey, "filter"]}
+                  >
+                    <Select
+                      defaultValue={["sentiment"]}
+                      onChange={handleSelectChange}
+                      style={{ width: 200 }}
+                    >
+                      {["sentiment", "category", "source"].map((v: string) => (
+                        <Select.Option value={v} key={v}>
+                          {v}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Form.Item
+                    {...restField}
+                    name={[name, "filterValues"]}
+                    fieldKey={[fieldKey, "filter"]}
+                  >
+                    <Select
+                      mode="multiple"
+                      // size={size}
+                      placeholder="Please select"
+                      defaultValue={["negative"]}
+                      onChange={handleSelectChange}
+                      style={{ width: "100%" }}
+                    >
+                      {["negative", "positive"]}
+                    </Select>
+                  </Form.Item>
+                </Space>
+              ))}
+            </>
+          )}
+        </Form.List>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
         </Form.Item>
       </Form>
     </Modal>

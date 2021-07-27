@@ -6,9 +6,8 @@ import "./App.css";
 import DisplayNews from "./Components/DisplayNews";
 import ListNews from "./Components/ListNews";
 import moment, { Moment } from "moment";
-// import type {RangeValue} from 'moment/src/lib/utils/interface'
 import { RangeValue } from "rc-picker/lib/interface";
-import SearchForm  from "./Components/SearchForm/";
+import SearchForm from "./Components/SearchForm/";
 export interface NewsObject {
   date: String;
   sentiment: String;
@@ -33,18 +32,26 @@ declare type queryObject = {
   category_id?: string;
 };
 const baseURL = "https://get.scrapehero.com/news-api/news/";
-// const KEY = "IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
+const categoryBaseURL = "https://get.scrapehero.com/news-api/categories/";
+const sourcesBaseURL = "https://get.scrapehero.com/news-api/sources/";
 
 function App() {
+  const categoryQueryString = serialize({}, categoryBaseURL);
+  const sourcesQueryString = serialize({}, sourcesBaseURL);
+  const dateFormatString = "YYYY-MM-DD";
+
+  //STATES
   const [visible, setVisible] = useState<boolean>(false);
-  const [query, setQuery] = useState<queryObject>(()=>{
+  const [query, setQuery] = useState<queryObject>(() => {
     const recorveredFilter = localStorage.getItem("filters");
     const filters: queryObject | {} = recorveredFilter
       ? JSON.parse(recorveredFilter)
       : {};
-      return filters
+    return filters;
   });
   const [selectedNews, setSelectedNews] = useState<null | NewsObject>(null);
+
+  //QUERIES
   const { isLoading, error, data, status } = useQuery(
     ["allnews", query],
     async () => {
@@ -57,32 +64,48 @@ function App() {
     },
     { staleTime: 120 * 1000 }
   );
+  const categoriesQuery = useQuery(
+    "categories",
+    async () => {
+      const response = await fetch(categoryQueryString);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
-  //get stored filters
-  // useEffect(() => {
-  //   const recorveredFilter = localStorage.getItem("filters");
-  //   const filters: queryObject | {} = recorveredFilter
-  //     ? JSON.parse(recorveredFilter)
-  //     : {};
-  //   setQuery(filters);
-  // }, []);
+      return response.json();
+    },
+    { staleTime: 120 * 1000 }
+  );
+  const sourcesQuery = useQuery(
+    "sources",
+    async () => {
+      const response = await fetch(sourcesQueryString);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
-  //handle search
-  const handleSearch=(value:string):void=>{
-    console.log('search term',value==="");
-    //when user clears search term, remove it from query object
-    if(value===""){
-      setQuery((prevState)=>{
-        const {q,...newState}=prevState;
+      return response.json();
+    },
+    { staleTime: 120 * 1000 }
+  );
+
+  /**
+   * Get the search term and set it to query object, if the user has cleared the field then value is an empty string.
+   * so remove q field from query object
+   * @param value Search term
+   */
+  const handleSearch = (value: string): void => {
+    console.log("search term", value === "");
+    if (value === "") {
+      //when user clears search term, remove it from query object
+      setQuery((prevState) => {
+        const { q, ...newState } = prevState;
         return newState;
-      })
+      });
+    } else {
+      setQuery((prevState) => ({ ...prevState, q: value }));
     }
-    else{
-      setQuery((prevState)=>({...prevState,q:value}));
-    }
-  }
-  //handle daterange
-  const dateFormatString = "YYYY-MM-DD";
+  };
   /**
    * Get the start and end date and set start_date and end_date fields in query object
    * @param values An array of moment objects
@@ -109,7 +132,12 @@ function App() {
 
   return (
     <>
-    <SearchForm show={visible} setShow={setVisible}/>
+      <SearchForm
+        show={visible}
+        setShow={setVisible}
+        sourcesQuery={sourcesQuery}
+        categoriesQuery={categoriesQuery}
+      />
       <Layout>
         <Header style={{ background: "#ffffff" }}>
           <Row>
@@ -118,7 +146,7 @@ function App() {
             </Col>
             <Col span={16}>
               <Input.Search
-              defaultValue={query.q || undefined}
+                defaultValue={query.q || undefined}
                 className="ant-col ant-col-10"
                 allowClear
                 type="search"
@@ -134,11 +162,12 @@ function App() {
               <DatePicker.RangePicker
                 //at the moment default values are not set FIX
                 defaultValue={
-                   query.start_date && query.end_date ?
-                   [
-                    moment(query.start_date, dateFormatString),
-                    moment(query.end_date, dateFormatString),
-                  ]:undefined
+                  query.start_date && query.end_date
+                    ? [
+                        moment(query.start_date, dateFormatString),
+                        moment(query.end_date, dateFormatString),
+                      ]
+                    : undefined
                 }
                 format={dateFormatString}
                 onChange={onDateRangeChange}
@@ -159,7 +188,6 @@ function App() {
   );
 }
 
-// serialize({q})
 export default App;
 
 const serialize = <T extends Record<string, string>>(
