@@ -1,25 +1,25 @@
-import { Button, Col, DatePicker, Input, Modal, Row } from "antd";
+import { Button, Col, DatePicker, Input, Row } from "antd";
 import Layout, { Content, Footer, Header } from "antd/lib/layout/layout";
+import moment, { Moment } from "moment";
+import { RangeValue } from "rc-picker/lib/interface";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import "./App.css";
 import DisplayNews from "./Components/DisplayNews";
 import ListNews from "./Components/ListNews";
-import moment, { Moment } from "moment";
-import { RangeValue } from "rc-picker/lib/interface";
 import SearchForm from "./Components/SearchForm/";
 export interface NewsObject {
-  date: String;
-  sentiment: String;
-  title: String;
-  content: String;
-  url: String;
-  id: String;
-  parent_classification: String;
-  child_classification: String;
-  publication: String;
+  date: string;
+  sentiment: string;
+  title: string;
+  content: string;
+  url: string;
+  id: string;
+  parent_classification: string;
+  child_classification: string;
+  publication: string;
 }
-declare type queryObject = {
+export type queryObject = {
   start_date?: string;
   end_date?: string;
   sentiment?: string;
@@ -111,13 +111,21 @@ function App() {
    * @param values An array of moment objects
    */
   const onDateRangeChange = (values: RangeValue<Moment>): void => {
-    const start_date = values?.[0];
-    const end_date = values?.[1];
-    setQuery((prevState) => ({
-      ...prevState,
-      start_date: start_date?.format(dateFormatString),
-      end_date: end_date?.format(dateFormatString),
-    }));
+    if(values===null){
+      //if the user cleared the date range, remove date fields from query object
+      setQuery((prevState)=>{
+        const {start_date,end_date,...rest}=prevState;
+        return rest
+      })
+    }else{
+      const start_date = values?.[0];
+      const end_date = values?.[1];
+      setQuery((prevState) => ({
+        ...prevState,
+        start_date: start_date?.format(dateFormatString),
+        end_date: end_date?.format(dateFormatString),
+      }));
+    }
   };
 
   //set the first news to display
@@ -144,7 +152,7 @@ function App() {
             <Col span={6}>
               <h1>News Reader</h1>
             </Col>
-            <Col span={16}>
+            <Col span={16} className="header_search">
               <Input.Search
                 defaultValue={query.q || undefined}
                 className="ant-col ant-col-10"
@@ -156,29 +164,39 @@ function App() {
             </Col>
           </Row>
         </Header>
-        <Content>
+        <Content style={{background:'white'}}>
           <Row>
-            <Col span={6} style={{ borderRight: "1px solid rgba(0,0,0,0.06)" }}>
+            <Col
+              span={6}
+              style={{
+                borderRight: "1px solid rgba(0,0,0,0.06)",
+                padding: "0 2rem",
+                position:'relative'
+              }}
+            >
+              <div style={{background:'#ffffff',position:'sticky',top:0}}>
+
               <DatePicker.RangePicker
-                //at the moment default values are not set FIX
+              size="large"
                 defaultValue={
                   query.start_date && query.end_date
                     ? [
-                        moment(query.start_date, dateFormatString),
-                        moment(query.end_date, dateFormatString),
+                      moment(query.start_date, dateFormatString),
+                      moment(query.end_date, dateFormatString),
                       ]
-                    : undefined
-                }
-                format={dateFormatString}
-                onChange={onDateRangeChange}
-              ></DatePicker.RangePicker>
+                      : undefined
+                    }
+                    format={dateFormatString}
+                    onChange={onDateRangeChange}
+                    ></DatePicker.RangePicker>
+                    </div>
               <ListNews
                 data={isLoading ? [] : data.result.data}
                 setSelectedNews={setSelectedNews}
               />
             </Col>
-            <Col span={18}>
-              <DisplayNews data={selectedNews} isLoading={isLoading} />
+            <Col span={18} style={{ padding: "4rem 8rem" }}>
+              <DisplayNews query={query} data={selectedNews} isLoading={isLoading} />
             </Col>
           </Row>
         </Content>

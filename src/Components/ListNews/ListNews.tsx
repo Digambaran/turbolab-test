@@ -18,13 +18,11 @@ const ListItem = (props: { item: any; setNews: any }): JSX.Element => {
         onClick={() => {
           props.setNews(props.item);
         }}
-        level={3}
+        level={5}
         style={{ marginTop: ".1rem", cursor: "pointer" }}
       >
         {props.item.title}
       </Title>
-      <Paragraph>dsf</Paragraph>
-      <Divider style={{ margin: ".1rem 0" }} />
     </List.Item>
   );
 };

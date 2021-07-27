@@ -1,1 +1,19 @@
 @import "~antd/dist/antd.css";
+
+.header_search {
+  display: flex;
+  align-items: center;
+}
+p.antd-typography::first-letter {
+  float: left;
+  font-family: Georgia;
+  font-size: 75px;
+  line-height: 60px;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-left: 3px;
+}
+mark {
+  background: yellow;
+  font-weight: bold;
+}
