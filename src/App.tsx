@@ -33,7 +33,7 @@ declare type queryObject = {
   category_id?: string;
 };
 const baseURL = "https://get.scrapehero.com/news-api/news/";
-const KEY = "IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
+// const KEY = "IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
 
 function App() {
   const [visible, setVisible] = useState<boolean>(false);
@@ -166,7 +166,7 @@ const serialize = <T extends Record<string, string>>(
   obj: T,
   base: string
 ): string => {
-  let str = base + "?x-api-key=IHEwbeb7kN3f7I3Qizc1FqAJVexvcKUE";
+  let str = base + `?x-api-key=${process.env.REACT_APP_API_KEY}`;
 
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
