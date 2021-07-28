@@ -177,6 +177,11 @@ function App() {
               <div style={{background:'#ffffff',marginTop:'4px'}}>
 
               <DatePicker.RangePicker
+               ranges={{
+                Today: [moment(), moment()],
+                'Last 30 days':[moment().subtract(30,'days'),moment()],
+                'Last 60 days':[moment().subtract(60,'days'),moment()]
+              }}
               size="large"
                 defaultValue={
                   query.start_date && query.end_date
