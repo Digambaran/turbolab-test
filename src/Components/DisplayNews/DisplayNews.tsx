@@ -15,15 +15,14 @@ export const DisplayNews = ({data,isLoading,query}:DsiplayNewsProps): JSX.Elemen
   let sh=[];
   let s='';
   let sp:string[]|[]=data?.content.split(' ')||[];
-  console.log(sp,'element');
   
+  //to find and highlight the query word
   if(query.q){
     //@ts-ignore
     for (let i = 0; i < sp?.length||0; i++) {
       let element = sp[i];
-      // console.log('element',element);
       
-      if(element.toLocaleLowerCase()===query.q.toLocaleLowerCase()) sh.push(<mark>{" "+element}</mark>)
+      if(element.toLowerCase().indexOf(query.q.toLowerCase())!==-1) sh.push(<mark>{" "+element}</mark>)
       else{
         sh.push(" "+element)
 
@@ -33,7 +32,6 @@ export const DisplayNews = ({data,isLoading,query}:DsiplayNewsProps): JSX.Elemen
   }else{
     sh.push(data?.content||"");
   }
-  // console.log(sh);
   
   return (
     <Skeleton title={true} paragraph={{'rows':100}} loading={isLoading} active>
@@ -43,7 +41,7 @@ export const DisplayNews = ({data,isLoading,query}:DsiplayNewsProps): JSX.Elemen
        <Typography.Paragraph type="secondary">{d}</Typography.Paragraph>
      </div>
      <Divider/>
-    <p className='antd-typography'>{sh}</p>
+    <p className='ant-typography'>{sh}</p>
     </Skeleton>
   );
 };

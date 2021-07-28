@@ -10,7 +10,7 @@ import ListNews from "./Components/ListNews";
 import SearchForm from "./Components/SearchForm/";
 export interface NewsObject {
   date: string;
-  sentiment: string;
+  sentiment: "Positive"|"Negative"|"Neutral";
   title: string;
   content: string;
   url: string;
@@ -164,7 +164,7 @@ function App() {
             </Col>
           </Row>
         </Header>
-        <Content style={{background:'white'}}>
+        <Content className="content">
           <Row>
             <Col
               span={6}
@@ -174,7 +174,7 @@ function App() {
                 position:'relative'
               }}
             >
-              <div style={{background:'#ffffff',position:'sticky',top:0}}>
+              <div style={{background:'#ffffff',marginTop:'4px'}}>
 
               <DatePicker.RangePicker
               size="large"
@@ -193,6 +193,7 @@ function App() {
               <ListNews
                 data={isLoading ? [] : data.result.data}
                 setSelectedNews={setSelectedNews}
+                selectedId={selectedNews?.id}
               />
             </Col>
             <Col span={18} style={{ padding: "4rem 8rem" }}>
