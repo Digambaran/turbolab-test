@@ -105,7 +105,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       enableReinitialize
         initialValues={formState}
         onSubmit={handleSubmit}
-        render={SearchForm}
+        render={formikRender}
       />
     </Modal>
   );

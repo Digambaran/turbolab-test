@@ -95,7 +95,7 @@ interface MyProps {
  * @returns a render function for Formik render
  */
 export const SearchForm = (
-  // { avfilters, customActionsOnChange }: MyProps,
+  { avfilters, customActionsOnChange }: MyProps,
   {
     handleSubmit,
     values,
@@ -111,8 +111,7 @@ export const SearchForm = (
       <FieldArray
         name="filters"
         //@ts-ignore
-        // component={CustomField(values, avfilters, customActionsOnChange)}
-        component={CustomField(values, ['Sentiment','Category','Source'], ()=>{})}
+        component={CustomField(values, avfilters, customActionsOnChange)}
       />
       <div className="submit-container">
         <button className="ant-btn ant-btn-primary" type="submit">
