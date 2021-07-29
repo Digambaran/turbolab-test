@@ -8,6 +8,7 @@ import "./App.css";
 import DisplayNews from "./Components/DisplayNews";
 import ListNews from "./Components/ListNews";
 import SearchForm from "./Components/SearchForm/";
+import { SearchFormContainer } from "./Components/SearchFormContainer/SearchFormContainer";
 export interface NewsObject {
   date: string;
   sentiment: "Positive"|"Negative"|"Neutral";
@@ -62,7 +63,7 @@ function App() {
 
       return response.json();
     },
-    { staleTime: 120 * 1000 }
+    { staleTime: 12000 * 1000 }
   );
   const categoriesQuery = useQuery(
     "categories",
@@ -74,7 +75,7 @@ function App() {
 
       return response.json();
     },
-    { staleTime: 120 * 1000 }
+    { staleTime: 12000 * 1000 }
   );
   const sourcesQuery = useQuery(
     "sources",
@@ -86,7 +87,7 @@ function App() {
 
       return response.json();
     },
-    { staleTime: 120 * 1000 }
+    { staleTime: 12000 * 1000 }
   );
 
   /**
@@ -140,12 +141,13 @@ function App() {
 
   return (
     <>
-      <SearchForm
+      {/* <SearchForm
         show={visible}
         setShow={setVisible}
         sourcesQuery={sourcesQuery}
         categoriesQuery={categoriesQuery}
-      />
+      /> */}
+      <SearchFormContainer show={visible} setShow={setVisible} categoriesQuery={categoriesQuery} sourcesQuery={sourcesQuery} />
       <Layout>
         <Header style={{ background: "#ffffff" }}>
           <Row>
