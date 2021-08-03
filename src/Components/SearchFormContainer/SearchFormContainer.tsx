@@ -1,8 +1,6 @@
-import React, { Dispatch, useState } from "react";
-import { Formik } from "formik";
-
-import moment from "moment";
 import { Modal } from "antd";
+import { Formik } from "formik";
+import React, { Dispatch, useState } from "react";
 import { SearchForm } from "../SearchForm/SearchForm";
 
 const initialValues = {
@@ -66,21 +64,12 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
     }
   };
 
-  console.log('formstate',formState);
-  
+  console.log("formstate", formState);
 
   //@ts-ignore
   const handleSubmit = (formProps) => {
     console.log(formProps, "df");
-
-    // const { bookingClient, bookingDate, bookingTime, email } = formProps;
-    // const selectedDate = moment(bookingDate).format(dateFormat);
-    // const selectedTime = moment(bookingTime).format(timeFormat);
-    // alert(
-    //   `Email: ${email} \nSelected Date: ${selectedDate} \nSelected Time: ${selectedTime}\nSelected Client: ${bookingClient}`
-    // );
   };
-  const formikRender=SearchForm.bind(null,{avfilters:availableFilters, customActionsOnChange:customActionsOnChange})
   return (
     <Modal
       visible={show}
@@ -101,11 +90,11 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
         //   });
       }}
     >
-      <Formik
-      enableReinitialize
-        initialValues={formState}
-        onSubmit={handleSubmit}
-        render={formikRender}
+      <SearchForm
+        formState={formState}
+        avfilters={availableFilters}
+        customActionsOnChange={customActionsOnChange}
+        handleSubmit={handleSubmit}
       />
     </Modal>
   );

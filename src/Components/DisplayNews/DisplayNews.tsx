@@ -1,7 +1,7 @@
-import { Divider, Skeleton, Typography} from "antd";
+import { Divider, Skeleton, Typography } from "antd";
+import moment from "moment";
 import React from "react";
 import { NewsObject, queryObject } from "../../App";
-import moment from "moment";
 
 declare type DsiplayNewsProps ={
     data:NewsObject | null;
