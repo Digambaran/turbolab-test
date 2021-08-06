@@ -24,9 +24,9 @@ export interface categoryObject extends subCategoryObject {
   sub_categories: Array<subCategoryObject>;
 }
 
-export interface sentimentObject{
-  label:string;
-  value:string;
+export interface sentimentObject {
+  label: string;
+  value: string;
 }
 
 interface SearchFormProps {
@@ -36,22 +36,33 @@ interface SearchFormProps {
   formState: any;
   categories: categoryObject[];
   sources: sourceObject[];
-  sentiments:sentimentObject[];
+  sentiments: sentimentObject[];
 }
 
 interface DependentSelectProps {
   index: number;
-  customActionsOnChange: Function;
   categories: categoryObject[];
   sources: sourceObject[];
-  sentiments:sentimentObject[];
+  sentiments: sentimentObject[];
 }
+
+/**
+ * returns options for filters dynamically, removing already selected filter option
+ * @param avfilters Available filters
+ * @param values Current values array of formik
+ */
+const filterOptions = (avfilters: string[], filters: []) =>
+  avfilters.filter(
+    (f) =>
+      //@ts-ignore
+      filters.findIndex((ff: any) => ff.key === f) === -1
+  );
+
 const DependentSelect: React.FC<DependentSelectProps> = ({
   index,
-  customActionsOnChange,
   categories,
   sources,
-  sentiments
+  sentiments,
 }) => {
   const { values, setValues } = useFormikContext();
   //@ts-ignore
@@ -69,7 +80,6 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
     setValues({ filters: newFilters });
   }, [index, filters[index].key]);
 
-  // const [field, meta] = useField(props);
 
   console.log(filters, "formik context");
 
@@ -95,7 +105,7 @@ export const SearchForm = ({
   handleSubmit,
   categories,
   sources,
-  sentiments
+  sentiments,
 }: SearchFormProps) => {
   return (
     //@ts-ignore
@@ -104,19 +114,13 @@ export const SearchForm = ({
       initialValues={formState}
       onSubmit={handleSubmit}
     >
-      {({ handleSubmit, handleChange, handleBlur, values, errors }) => (
+      {({  values }) => (
         <Form className="form-container">
           <FieldArray
             name="filters"
             //@ts-ignore
             render={({
-              move,
-              swap,
               push,
-              insert,
-              unshift,
-              pop,
-              ...rest
             }: ArrayHelpers) => {
               return (
                 <>
@@ -134,14 +138,16 @@ export const SearchForm = ({
                           component={AntSelect}
                           name={`filters[${index}].key`}
                           customActions={customActionsOnChange}
-                          selectOptions={avfilters}
+                          selectOptions={filterOptions(
+                            avfilters,
+                            values.filters
+                          )}
                           tokenSeparators={[","]}
                           style={{ width: 200 }}
                           hasFeedback
                         />
                         <DependentSelect
                           index={index}
-                          customActionsOnChange={customActionsOnChange}
                           categories={categories}
                           sources={sources}
                           sentiments={sentiments}

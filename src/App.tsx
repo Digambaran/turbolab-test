@@ -52,12 +52,13 @@ function App() {
   });
   const [selectedNews, setSelectedNews] = useState<null | NewsObject>(null);
 
+  //Transform Data
   const categoriesSelectFn=(data:categoryObject[])=>{
-    console.count('in category select');
+    console.count('category select called-');
     return data.map((obj)=>({label:obj.category,value:obj.iptc_code}));
   }
   const sourcesSelectFn=({sources}:any)=>{
-    console.count('in source select');
+    console.count('source select called-');
     return sources.map((obj:any)=>({label:obj.name,value:obj.id}));
   }
 
@@ -150,7 +151,7 @@ function App() {
 
   return (
     <>
-      {/* <SearchForm
+     {/* <SearchForm
         show={visible}
         setShow={setVisible}
         sourcesQuery={sourcesQuery}

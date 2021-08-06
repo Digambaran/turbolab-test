@@ -56,7 +56,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
 
     if (isKey) {
       //remove already used filters
-      setAvailableFilters((prevState) => prevState.filter((v) => v !== value));
+      // setAvailableFilters((prevState) => prevState.filter((v) => v !== value));
       // setFormState((prevState) => {
       //   let newFilters = [...prevState.filters];
       //   //@ts-ignore if key then not array
