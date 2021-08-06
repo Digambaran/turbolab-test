@@ -57,20 +57,20 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
     if (isKey) {
       //remove already used filters
       setAvailableFilters((prevState) => prevState.filter((v) => v !== value));
-      setFormState((prevState) => {
-        let newFilters = [...prevState.filters];
-        //@ts-ignore if key then not array
-        newFilters[parseInt(index)]['key'] = value;
-        newFilters[parseInt(index)]['options'] =
-          value === "Source"
-            ? sourcesQuery.data
-            : value === "Category"
-            ? categoriesQuery.data
-            : sentimentsArray;
-        return {
-          filters: newFilters,
-        };
-      });
+      // setFormState((prevState) => {
+      //   let newFilters = [...prevState.filters];
+      //   //@ts-ignore if key then not array
+      //   newFilters[parseInt(index)]['key'] = value;
+      //   newFilters[parseInt(index)]['options'] =
+      //     value === "Source"
+      //       ? sourcesQuery.data
+      //       : value === "Category"
+      //       ? categoriesQuery.data
+      //       : sentimentsArray;
+      //   return {
+      //     filters: newFilters,
+      //   };
+      // });
     }
   };
 
@@ -105,6 +105,9 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
         avfilters={availableFilters}
         customActionsOnChange={customActionsOnChange}
         handleSubmit={handleSubmit}
+        categories={categoriesQuery.data}
+        sources={sourcesQuery.data}
+        sentiments={sentimentsArray}
       />
     </Modal>
   );

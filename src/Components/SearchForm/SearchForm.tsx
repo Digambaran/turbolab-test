@@ -5,9 +5,9 @@ import {
   FieldArray,
   Form,
   Formik,
-  useFormikContext,
+  useFormikContext
 } from "formik";
-import React, { Dispatch, useEffect } from "react";
+import React, { useEffect } from "react";
 import { AntSelect } from "../CreateAntFields/CreateAntFields";
 
 export interface sourceObject {
@@ -23,41 +23,51 @@ export interface subCategoryObject {
 export interface categoryObject extends subCategoryObject {
   sub_categories: Array<subCategoryObject>;
 }
-export interface SearchFormProps {
-  show: boolean;
-  setShow: Dispatch<React.SetStateAction<boolean>>;
-  categoriesQuery: any;
-  sourcesQuery: any;
+
+export interface sentimentObject{
+  label:string;
+  value:string;
 }
 
-interface MyProps {
+interface SearchFormProps {
   avfilters: string[];
   customActionsOnChange: Function;
   handleSubmit: any;
   formState: any;
+  categories: categoryObject[];
+  sources: sourceObject[];
+  sentiments:sentimentObject[];
 }
 
 interface DependentSelectProps {
   index: number;
   customActionsOnChange: Function;
-  formState: any;
+  categories: categoryObject[];
+  sources: sourceObject[];
+  sentiments:sentimentObject[];
 }
 const DependentSelect: React.FC<DependentSelectProps> = ({
   index,
   customActionsOnChange,
-  formState,
+  categories,
+  sources,
+  sentiments
 }) => {
-  const {
-    values: { filters },
-  } = useFormikContext();
-  // const selectOptions=formState.filters[index]?.options||[];
-
+  const { values, setValues } = useFormikContext();
+  //@ts-ignore
+  const filters = values.filters;
   //change if value of key has changed
   useEffect(() => {
-    if (filters.length === formState.filters.length) {
-      filters[index].options = formState.filters[index].options;
-    }
-  }, [formState, index, filters]);
+    const newFilters = [...filters];
+    newFilters[index].values = [];
+    newFilters[index].options =
+      newFilters[index].key === "Category"
+        ? categories
+        : newFilters[index].key === "Source"
+        ? sources
+        : sentiments;
+    setValues({ filters: newFilters });
+  }, [index, filters[index].key]);
 
   // const [field, meta] = useField(props);
 
@@ -68,7 +78,8 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
       component={AntSelect}
       name={`filters[${index}].values`}
       mode="multiple"
-      customActions={customActionsOnChange}
+      // customActions={customActionsOnChange}
+      customActions={() => {}}
       tokenSeparators={[","]}
       options={filters[index].options}
       style={{ width: 200 }}
@@ -82,7 +93,10 @@ export const SearchForm = ({
   avfilters,
   customActionsOnChange,
   handleSubmit,
-}: MyProps) => {
+  categories,
+  sources,
+  sentiments
+}: SearchFormProps) => {
   return (
     //@ts-ignore
     <Formik
@@ -128,7 +142,9 @@ export const SearchForm = ({
                         <DependentSelect
                           index={index}
                           customActionsOnChange={customActionsOnChange}
-                          formState={formState}
+                          categories={categories}
+                          sources={sources}
+                          sentiments={sentiments}
                         />
                       </Row>
                     ))
