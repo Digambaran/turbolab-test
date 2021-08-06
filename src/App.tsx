@@ -7,7 +7,7 @@ import { useQuery } from "react-query";
 import "./App.css";
 import DisplayNews from "./Components/DisplayNews";
 import ListNews from "./Components/ListNews";
-import SearchForm from "./Components/SearchForm/";
+import { categoryObject } from "./Components/SearchForm/SearchForm";
 import { SearchFormContainer } from "./Components/SearchFormContainer/SearchFormContainer";
 export interface NewsObject {
   date: string;
@@ -52,6 +52,15 @@ function App() {
   });
   const [selectedNews, setSelectedNews] = useState<null | NewsObject>(null);
 
+  const categoriesSelectFn=(data:categoryObject[])=>{
+    console.count('in category select');
+    return data.map((obj)=>({label:obj.category,value:obj.iptc_code}));
+  }
+  const sourcesSelectFn=({sources}:any)=>{
+    console.count('in source select');
+    return sources.map((obj:any)=>({label:obj.name,value:obj.id}));
+  }
+
   //QUERIES
   const { isLoading, error, data, status } = useQuery(
     ["allnews", query],
@@ -75,7 +84,7 @@ function App() {
 
       return response.json();
     },
-    { staleTime: 12000 * 1000 }
+    { staleTime: 12000 * 1000,select:categoriesSelectFn }
   );
   const sourcesQuery = useQuery(
     "sources",
@@ -87,7 +96,7 @@ function App() {
 
       return response.json();
     },
-    { staleTime: 12000 * 1000 }
+    { staleTime: 12000 * 1000,select:sourcesSelectFn }
   );
 
   /**

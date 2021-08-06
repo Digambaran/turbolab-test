@@ -1,8 +1,28 @@
 import { Button, Row } from "antd";
-import { ArrayHelpers, Field, FieldArray, Form, Formik } from "formik";
-import React, { Dispatch } from "react";
+import {
+  ArrayHelpers,
+  Field,
+  FieldArray,
+  Form,
+  Formik,
+  useFormikContext,
+} from "formik";
+import React, { Dispatch, useEffect } from "react";
 import { AntSelect } from "../CreateAntFields/CreateAntFields";
 
+export interface sourceObject {
+  id: number;
+  name: string;
+  domain: string;
+}
+
+export interface subCategoryObject {
+  category: string;
+  iptc_code: string;
+}
+export interface categoryObject extends subCategoryObject {
+  sub_categories: Array<subCategoryObject>;
+}
 export interface SearchFormProps {
   show: boolean;
   setShow: Dispatch<React.SetStateAction<boolean>>;
@@ -17,12 +37,45 @@ interface MyProps {
   formState: any;
 }
 
-/**
- * Function
- * @param avfilters Available filters to be selected
- * @param setAvFilters Set available filters setstate function
- * @returns a render function for Formik render
- */
+interface DependentSelectProps {
+  index: number;
+  customActionsOnChange: Function;
+  formState: any;
+}
+const DependentSelect: React.FC<DependentSelectProps> = ({
+  index,
+  customActionsOnChange,
+  formState,
+}) => {
+  const {
+    values: { filters },
+  } = useFormikContext();
+  // const selectOptions=formState.filters[index]?.options||[];
+
+  //change if value of key has changed
+  useEffect(() => {
+    if (filters.length === formState.filters.length) {
+      filters[index].options = formState.filters[index].options;
+    }
+  }, [formState, index, filters]);
+
+  // const [field, meta] = useField(props);
+
+  console.log(filters, "formik context");
+
+  return (
+    <Field
+      component={AntSelect}
+      name={`filters[${index}].values`}
+      mode="multiple"
+      customActions={customActionsOnChange}
+      tokenSeparators={[","]}
+      options={filters[index].options}
+      style={{ width: 200 }}
+      hasFeedback
+    />
+  );
+};
 
 export const SearchForm = ({
   formState,
@@ -51,11 +104,12 @@ export const SearchForm = ({
               pop,
               ...rest
             }: ArrayHelpers) => {
-              console.log(values, "hy");
-
               return (
                 <>
-                  <Button onClick={() => push({ key: "", values: "" })}>
+                  <Button
+                    disabled={values.filters.length === 3}
+                    onClick={() => push({ key: "", values: "", options: [] })}
+                  >
                     Add New Filter
                   </Button>
                   {
@@ -71,14 +125,10 @@ export const SearchForm = ({
                           style={{ width: 200 }}
                           hasFeedback
                         />
-                        <Field
-                          component={AntSelect}
-                          name={`filters[${index}].values`}
-                          mode="multiple"
-                          customActions={customActionsOnChange}
-                          tokenSeparators={[","]}
-                          style={{ width: 200 }}
-                          hasFeedback
+                        <DependentSelect
+                          index={index}
+                          customActionsOnChange={customActionsOnChange}
+                          formState={formState}
                         />
                       </Row>
                     ))

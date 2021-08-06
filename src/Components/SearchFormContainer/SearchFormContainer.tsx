@@ -1,10 +1,9 @@
 import { Modal } from "antd";
-import { Formik } from "formik";
 import React, { Dispatch, useState } from "react";
 import { SearchForm } from "../SearchForm/SearchForm";
 
 const initialValues = {
-  filters: [{ key: "asdas", values: ["sfssf"], options: ["sda"] }],
+  filters: [{ key: "", values: [], options: [] }],
 };
 
 interface FormFieldObject {
@@ -27,7 +26,11 @@ declare interface SearchFormContainerProps {
 }
 
 const Filters = ["Category", "Source", "Sentiment"];
-const sentimentsArray = ["Negative", "Positive", "Neutral"];
+const sentimentsArray = [
+  { label: "Negative", value: "Negative" },
+  { label: "Positive", value: "Positive" },
+  { label: "Neutral", value: "Neutral" },
+];
 export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   show,
   setShow,
@@ -37,6 +40,11 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
   const [formState, setFormState] = useState<FormState>(initialValues);
 
+  /**
+   * On every change of filter and filter value, change the form state.
+   * @param name Name of field that changed, filter[index].key or filter[index].values
+   * @param value The changed value from the field, if options is changed then string array
+   */
   const customActionsOnChange = (
     name: string,
     value: "Source" | "Sentiment" | "Category" | string[]
@@ -51,9 +59,11 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       setAvailableFilters((prevState) => prevState.filter((v) => v !== value));
       setFormState((prevState) => {
         let newFilters = [...prevState.filters];
-        newFilters[parseInt(index)].options =
+        //@ts-ignore if key then not array
+        newFilters[parseInt(index)]['key'] = value;
+        newFilters[parseInt(index)]['options'] =
           value === "Source"
-            ? sourcesQuery.data.source
+            ? sourcesQuery.data
             : value === "Category"
             ? categoriesQuery.data
             : sentimentsArray;
