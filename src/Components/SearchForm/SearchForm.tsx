@@ -5,7 +5,7 @@ import {
   FieldArray,
   Form,
   Formik,
-  useFormikContext
+  useFormikContext,
 } from "formik";
 import React, { useEffect } from "react";
 import { AntSelect } from "../CreateAntFields/CreateAntFields";
@@ -30,6 +30,7 @@ export interface sentimentObject {
 }
 
 interface SearchFormProps {
+  passFormikSubmitUP: Function;
   avfilters: string[];
   customActionsOnChange: Function;
   handleSubmit: any;
@@ -80,7 +81,6 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
     setValues({ filters: newFilters });
   }, [index, filters[index].key]);
 
-
   console.log(filters, "formik context");
 
   return (
@@ -102,6 +102,7 @@ export const SearchForm = ({
   formState,
   avfilters,
   customActionsOnChange,
+  passFormikSubmitUP,
   handleSubmit,
   categories,
   sources,
@@ -114,58 +115,59 @@ export const SearchForm = ({
       initialValues={formState}
       onSubmit={handleSubmit}
     >
-      {({  values }) => (
-        <Form className="form-container">
-          <FieldArray
-            name="filters"
-            //@ts-ignore
-            render={({
-              push,
-            }: ArrayHelpers) => {
-              return (
-                <>
-                  <Button
-                    disabled={values.filters.length === 3}
-                    onClick={() => push({ key: "", values: "", options: [] })}
-                  >
-                    Add New Filter
-                  </Button>
-                  {
-                    //@ts-ignore
-                    values.filters.map((filter: any, index: any) => (
-                      <Row key={index}>
-                        <Field
-                          component={AntSelect}
-                          name={`filters[${index}].key`}
-                          customActions={customActionsOnChange}
-                          selectOptions={filterOptions(
-                            avfilters,
-                            values.filters
-                          )}
-                          tokenSeparators={[","]}
-                          style={{ width: 200 }}
-                          hasFeedback
-                        />
-                        <DependentSelect
-                          index={index}
-                          categories={categories}
-                          sources={sources}
-                          sentiments={sentiments}
-                        />
-                      </Row>
-                    ))
-                  }
-                </>
-              );
-            }}
-          />
-          <div className="submit-container">
-            <button className="ant-btn ant-btn-primary" type="submit">
-              Submit
-            </button>
-          </div>
-        </Form>
-      )}
+      {({ values, submitForm }) => {
+        passFormikSubmitUP(submitForm);
+        return (
+          <Form className="form-container">
+            <FieldArray
+              name="filters"
+              //@ts-ignore
+              render={({ push }: ArrayHelpers) => {
+                return (
+                  <>
+                    <Button
+                      disabled={values.filters.length === 3}
+                      onClick={() => push({ key: "", values: "", options: [] })}
+                    >
+                      Add New Filter
+                    </Button>
+                    {
+                      //@ts-ignore
+                      values.filters.map((filter: any, index: any) => (
+                        <Row key={index}>
+                          <Field
+                            component={AntSelect}
+                            name={`filters[${index}].key`}
+                            customActions={customActionsOnChange}
+                            selectOptions={filterOptions(
+                              avfilters,
+                              values.filters
+                            )}
+                            tokenSeparators={[","]}
+                            style={{ width: 200 }}
+                            hasFeedback
+                          />
+                          <DependentSelect
+                            index={index}
+                            categories={categories}
+                            sources={sources}
+                            sentiments={sentiments}
+                          />
+                        </Row>
+                      ))
+                    }
+                  </>
+                );
+              }}
+            />
+            <div className="submit-container">
+              <button className="ant-btn ant-btn-primary" type="submit">
+                Submit
+              </button>
+            </div>
+          </Form>
+        );
+      }}
     </Formik>
   );
 };

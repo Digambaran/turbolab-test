@@ -74,11 +74,17 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
     }
   };
 
+  const handleFormSubmit=(v:any)=>{
+    console.log('valuesss',v);
+    
+  }
   console.log("formstate", formState);
 
+  //could use a ref instead of this, to get formik submit
+  var handleSubmit:Function|null=null
   //@ts-ignore
-  const handleSubmit = (formProps) => {
-    console.log(formProps, "df");
+  const getFormikSubmit = (submitForm) => {
+   handleSubmit=submitForm;
   };
   return (
     <Modal
@@ -88,6 +94,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       cancelText="Cancel"
       onCancel={() => setShow(false)}
       onOk={() => {
+        handleSubmit&&handleSubmit();
         // form
         //   .validateFields()
         //   .then((values) => {
@@ -101,13 +108,14 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       }}
     >
       <SearchForm
+      handleSubmit={handleFormSubmit}
         formState={formState}
         avfilters={availableFilters}
         customActionsOnChange={customActionsOnChange}
-        handleSubmit={handleSubmit}
         categories={categoriesQuery.data}
         sources={sourcesQuery.data}
         sentiments={sentimentsArray}
+        passFormikSubmitUP={getFormikSubmit}
       />
     </Modal>
   );
