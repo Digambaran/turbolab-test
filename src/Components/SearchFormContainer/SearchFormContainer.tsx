@@ -1,5 +1,6 @@
 import { Modal } from "antd";
 import React, { Dispatch, useState } from "react";
+import { queryObject } from "../../App";
 import { SearchForm } from "../SearchForm/SearchForm";
 
 const initialValues = {
@@ -21,6 +22,7 @@ interface FormState {
 declare interface SearchFormContainerProps {
   show: boolean;
   setShow: Dispatch<React.SetStateAction<boolean>>;
+  setQuery:Dispatch<React.SetStateAction<queryObject>>;
   categoriesQuery: any;
   sourcesQuery: any;
 }
@@ -36,6 +38,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   setShow,
   categoriesQuery,
   sourcesQuery,
+  setQuery
 }) => {
   const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
   const [formState, setFormState] = useState<FormState>(initialValues);
@@ -76,7 +79,13 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
 
   const handleFormSubmit=(v:any)=>{
     console.log('valuesss',v);
-    
+    const q=v.filters.reduce((acc:queryObject,cur:any)=>{
+      if(cur.key==="Category") acc['category_id']=cur.values;
+      if(cur.key==="Sentiment") acc['sentiment']=cur.values;
+      if(cur.key==="Source") acc['source_id']=cur.values;
+      return acc
+    },{})
+    setQuery((prevState)=>({...prevState,...q}))
   }
   console.log("formstate", formState);
 

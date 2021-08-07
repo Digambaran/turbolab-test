@@ -157,7 +157,7 @@ function App() {
         sourcesQuery={sourcesQuery}
         categoriesQuery={categoriesQuery}
       /> */}
-      <SearchFormContainer show={visible} setShow={setVisible} categoriesQuery={categoriesQuery} sourcesQuery={sourcesQuery} />
+      <SearchFormContainer setQuery={setQuery} show={visible} setShow={setVisible} categoriesQuery={categoriesQuery} sourcesQuery={sourcesQuery} />
       <Layout>
         <Header style={{ background: "#ffffff" }}>
           <Row>
