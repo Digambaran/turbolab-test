@@ -87,7 +87,7 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
     <Field
       component={AntSelect}
       name={`filters[${index}].values`}
-      mode="multiple"
+      mode={filters[index].key==="Sentiment"?undefined:"multiple"}
       // customActions={customActionsOnChange}
       customActions={() => {}}
       tokenSeparators={[","]}
