@@ -22,7 +22,7 @@ interface FormState {
 declare interface SearchFormContainerProps {
   show: boolean;
   setShow: Dispatch<React.SetStateAction<boolean>>;
-  setQuery:Dispatch<React.SetStateAction<queryObject>>;
+  setQuery: Dispatch<React.SetStateAction<queryObject>>;
   categoriesQuery: any;
   sourcesQuery: any;
 }
@@ -38,7 +38,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   setShow,
   categoriesQuery,
   sourcesQuery,
-  setQuery
+  setQuery,
 }) => {
   const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
   const [formState, setFormState] = useState<FormState>(initialValues);
@@ -77,23 +77,39 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
     }
   };
 
-  const handleFormSubmit=(v:any)=>{
-    console.log('valuesss',v);
-    const q=v.filters.reduce((acc:queryObject,cur:any)=>{
-      if(cur.key==="Category") acc['category_id']=cur.values;
-      if(cur.key==="Sentiment") acc['sentiment']=cur.values;
-      if(cur.key==="Source") acc['source_id']=cur.values;
-      return acc
-    },{})
-    setQuery((prevState)=>({...prevState,...q}))
-  }
+  const handleFormSubmit = (v: any) => {
+    console.log("valuesss", v);
+    const q = v.filters.reduce((acc: queryObject, cur: any) => {
+      if (cur.key === "Category") {
+        //if user has removed all filters, remove field from acc
+        acc["category_id"] = cur.values;
+        if (cur.values.length === 0) delete acc["category_id"];
+      }
+      if (cur.key === "Source") {
+        acc["source_id"] = cur.values;
+        if (cur.values.length === 0) delete acc["source_id"];
+      }
+      //once the user has selected sentiment, can't remove..TODO- create option to remove
+      if (cur.key === "Sentiment") acc["sentiment"] = cur.values;
+      return acc;
+    }, {});
+    setQuery((prevState) => {
+      //extract rest of the query out.
+      const { category_id, source_id, sentiment, ...rest } = prevState;
+
+      return {
+        ...rest,
+        ...q,
+      };
+    });
+  };
   console.log("formstate", formState);
 
   //could use a ref instead of this, to get formik submit
-  var handleSubmit:Function|null=null
+  var handleSubmit: Function | null = null;
   //@ts-ignore
   const getFormikSubmit = (submitForm) => {
-   handleSubmit=submitForm;
+    handleSubmit = submitForm;
   };
   return (
     <Modal
@@ -103,7 +119,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       cancelText="Cancel"
       onCancel={() => setShow(false)}
       onOk={() => {
-        handleSubmit&&handleSubmit();
+        handleSubmit && handleSubmit();
         // form
         //   .validateFields()
         //   .then((values) => {
@@ -117,7 +133,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       }}
     >
       <SearchForm
-      handleSubmit={handleFormSubmit}
+        handleSubmit={handleFormSubmit}
         formState={formState}
         avfilters={availableFilters}
         customActionsOnChange={customActionsOnChange}
