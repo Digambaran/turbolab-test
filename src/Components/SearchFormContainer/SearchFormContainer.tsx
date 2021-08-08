@@ -39,15 +39,14 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   setQuery,
   query,
 }) => {
-  console.log('lololo',query);
-  
-  const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
-  const [initialValues, setInitialValues] = useState<FormState>({filters:[]});
+  console.count("SearchFormContainer rendered: ");
 
+  const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
+  const [initialValues, setInitialValues] = useState<FormState>({
+    filters: [],
+  });
 
   useEffect(() => {
-    console.log('lolo in useeffect',query);
-    
     const filters = [];
     if (query.category_id) {
       filters.push({
@@ -71,18 +70,15 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       });
     }
 
-    console.log('useeffect',filters);
-    
     //@ts-ignore
-    setInitialValues({filters:filters})
-
+    setInitialValues({ filters: filters });
   }, [
     categoriesQuery.data,
     sourcesQuery.data,
     query.sentiment,
     query.source_id,
     query.category_id,
-    show
+    show,
   ]);
 
   /**
@@ -94,33 +90,12 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
     name: string,
     value: "Source" | "Sentiment" | "Category" | string[]
   ) => {
-    console.log(name, value, "here");
 
     const [index, ...rest1] = name.match(/\d/) || [];
     const isKey = name.split(".")[1] === "key";
-
-    if (isKey) {
-      //remove already used filters
-      // setAvailableFilters((prevState) => prevState.filter((v) => v !== value));
-      // setFormState((prevState) => {
-      //   let newFilters = [...prevState.filters];
-      //   //@ts-ignore if key then not array
-      //   newFilters[parseInt(index)]['key'] = value;
-      //   newFilters[parseInt(index)]['options'] =
-      //     value === "Source"
-      //       ? sourcesQuery.data
-      //       : value === "Category"
-      //       ? categoriesQuery.data
-      //       : sentimentsArray;
-      //   return {
-      //     filters: newFilters,
-      //   };
-      // });
-    }
   };
 
   const handleFormSubmit = (v: any) => {
-    console.log("valuesss", v);
     const q = v.filters.reduce((acc: queryObject, cur: any) => {
       if (cur.key === "Category") {
         //if user has removed all filters, remove field from acc
@@ -161,16 +136,7 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       onCancel={() => setShow(false)}
       onOk={() => {
         handleSubmit && handleSubmit();
-        // form
-        //   .validateFields()
-        //   .then((values) => {
-        //     form.resetFields();
-        //     // onCreate(values);
-        //     console.log(values);
-        //   })
-        //   .catch((info) => {
-        //     console.log("Validate Failed:", info);
-        //   });
+        setShow(false);
       }}
     >
       <Spin

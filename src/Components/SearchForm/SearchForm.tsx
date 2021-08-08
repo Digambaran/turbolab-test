@@ -53,11 +53,7 @@ interface DependentSelectProps {
  * @param values Current values array of formik
  */
 const filterOptions = (avfilters: string[], filters: []) =>
-  avfilters.filter(
-    (f) =>
-      //@ts-ignore
-      filters.findIndex((ff: any) => ff.key === f) === -1
-  );
+  avfilters.filter((f) => filters.findIndex((ff: any) => ff.key === f) === -1);
 
 const DependentSelect: React.FC<DependentSelectProps> = ({
   index,
@@ -65,8 +61,9 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
   sources,
   sentiments,
 }) => {
+  console.count("Dependent select rendered: ");
+
   const { values, setValues } = useFormikContext();
-  console.log("in depen", categories, sources, values);
   //@ts-ignore
   const filters = values.filters;
   //change if value of key has changed
@@ -82,14 +79,11 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
     setValues({ filters: newFilters });
   }, [index, filters[index].key]);
 
-  console.log(filters, "formik context");
-
   return (
     <Field
       component={AntSelect}
       name={`filters[${index}].values`}
       mode={filters[index].key === "Sentiment" ? undefined : "multiple"}
-      // customActions={customActionsOnChange}
       customActions={() => {}}
       tokenSeparators={[","]}
       options={filters[index].options}
@@ -109,27 +103,22 @@ export const SearchForm = ({
   sources,
   sentiments,
 }: SearchFormProps) => {
-  console.log("culprit", formState);
-
-  useEffect(()=>console.log('mounted',formState),[formState.filters]
-  )
+  console.count("Search form rendered: ");
 
   return (
-    //@ts-ignore
     <Formik
       enableReinitialize
       initialValues={formState}
       onSubmit={handleSubmit}
     >
       {({ values, submitForm }) => {
+        //To pass Formik's submit up
         passFormikSubmitUP(submitForm);
-        console.log("formik valies", values);
 
         return (
           <Form className="form-container">
             <FieldArray
               name="filters"
-              //@ts-ignore
               render={({ push }: ArrayHelpers) => {
                 return (
                   <>
@@ -140,8 +129,7 @@ export const SearchForm = ({
                       Add New Filter
                     </Button>
                     {
-                      //@ts-ignore
-                      values.filters.map((filter: any, index: any) => (
+                      values.filters.map((filter: any, index: number) => (
                         <Row key={index}>
                           <Field
                             component={AntSelect}
@@ -168,11 +156,6 @@ export const SearchForm = ({
                 );
               }}
             />
-            <div className="submit-container">
-              <button className="ant-btn ant-btn-primary" type="submit">
-                Submit
-              </button>
-            </div>
           </Form>
         );
       }}

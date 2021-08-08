@@ -63,7 +63,7 @@ function App() {
   }
 
   //QUERIES
-  const { isLoading, error, data, status } = useQuery(
+  const { isLoading, data, status } = useQuery(
     ["allnews", query],
     async () => {
       const response = await fetch(serialize(query, baseURL));
@@ -106,7 +106,6 @@ function App() {
    * @param value Search term
    */
   const handleSearch = (value: string): void => {
-    console.log("search term", value === "");
     if (value === "") {
       //when user clears search term, remove it from query object
       setQuery((prevState) => {
@@ -151,12 +150,6 @@ function App() {
 
   return (
     <>
-     {/* <SearchForm
-        show={visible}
-        setShow={setVisible}
-        sourcesQuery={sourcesQuery}
-        categoriesQuery={categoriesQuery}
-      /> */}
       <SearchFormContainer query={query} setQuery={setQuery} show={visible} setShow={setVisible} categoriesQuery={categoriesQuery} sourcesQuery={sourcesQuery} />
       <Layout>
         <Header style={{ background: "#ffffff" }}>
