@@ -35,8 +35,8 @@ interface SearchFormProps {
   customActionsOnChange: Function;
   handleSubmit: any;
   formState: any;
-  categories: categoryObject[];
-  sources: sourceObject[];
+  categories: categoryObject[] | any;
+  sources: sourceObject[] | any;
   sentiments: sentimentObject[];
 }
 
@@ -66,6 +66,7 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
   sentiments,
 }) => {
   const { values, setValues } = useFormikContext();
+  console.log("in depen", categories, sources, values);
   //@ts-ignore
   const filters = values.filters;
   //change if value of key has changed
@@ -87,7 +88,7 @@ const DependentSelect: React.FC<DependentSelectProps> = ({
     <Field
       component={AntSelect}
       name={`filters[${index}].values`}
-      mode={filters[index].key==="Sentiment"?undefined:"multiple"}
+      mode={filters[index].key === "Sentiment" ? undefined : "multiple"}
       // customActions={customActionsOnChange}
       customActions={() => {}}
       tokenSeparators={[","]}
@@ -108,6 +109,11 @@ export const SearchForm = ({
   sources,
   sentiments,
 }: SearchFormProps) => {
+  console.log("culprit", formState);
+
+  useEffect(()=>console.log('mounted',formState),[formState.filters]
+  )
+
   return (
     //@ts-ignore
     <Formik
@@ -117,6 +123,8 @@ export const SearchForm = ({
     >
       {({ values, submitForm }) => {
         passFormikSubmitUP(submitForm);
+        console.log("formik valies", values);
+
         return (
           <Form className="form-container">
             <FieldArray

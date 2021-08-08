@@ -1,11 +1,8 @@
-import { Modal } from "antd";
-import React, { Dispatch, useState } from "react";
+import { Modal, Spin } from "antd";
+import React, { Dispatch, useEffect, useState } from "react";
+import { QueryObserverResult } from "react-query";
 import { queryObject } from "../../App";
 import { SearchForm } from "../SearchForm/SearchForm";
-
-const initialValues = {
-  filters: [{ key: "", values: [], options: [] }],
-};
 
 interface FormFieldObject {
   key: string;
@@ -23,8 +20,9 @@ declare interface SearchFormContainerProps {
   show: boolean;
   setShow: Dispatch<React.SetStateAction<boolean>>;
   setQuery: Dispatch<React.SetStateAction<queryObject>>;
-  categoriesQuery: any;
-  sourcesQuery: any;
+  categoriesQuery: QueryObserverResult;
+  sourcesQuery: QueryObserverResult;
+  query: queryObject;
 }
 
 const Filters = ["Category", "Source", "Sentiment"];
@@ -39,9 +37,53 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
   categoriesQuery,
   sourcesQuery,
   setQuery,
+  query,
 }) => {
+  console.log('lololo',query);
+  
   const [availableFilters, setAvailableFilters] = useState<string[]>(Filters);
-  const [formState, setFormState] = useState<FormState>(initialValues);
+  const [initialValues, setInitialValues] = useState<FormState>({filters:[]});
+
+
+  useEffect(() => {
+    console.log('lolo in useeffect',query);
+    
+    const filters = [];
+    if (query.category_id) {
+      filters.push({
+        key: "Category",
+        values: query.category_id,
+        options: categoriesQuery.data,
+      });
+    }
+    if (query.source_id) {
+      filters.push({
+        key: "Source",
+        values: query.source_id,
+        options: sourcesQuery.data,
+      });
+    }
+    if (query.sentiment) {
+      filters.push({
+        key: "Sentiment",
+        values: query.sentiment,
+        options: sentimentsArray,
+      });
+    }
+
+    console.log('useeffect',filters);
+    
+    //@ts-ignore
+    setInitialValues({filters:filters})
+
+  }, [
+    categoriesQuery.data,
+    sourcesQuery.data,
+    query.sentiment,
+    query.source_id,
+    query.category_id,
+    show
+  ]);
 
   /**
    * On every change of filter and filter value, change the form state.
@@ -103,7 +145,6 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
       };
     });
   };
-  console.log("formstate", formState);
 
   //could use a ref instead of this, to get formik submit
   var handleSubmit: Function | null = null;
@@ -132,16 +173,26 @@ export const SearchFormContainer: React.FC<SearchFormContainerProps> = ({
         //   });
       }}
     >
-      <SearchForm
-        handleSubmit={handleFormSubmit}
-        formState={formState}
-        avfilters={availableFilters}
-        customActionsOnChange={customActionsOnChange}
-        categories={categoriesQuery.data}
-        sources={sourcesQuery.data}
-        sentiments={sentimentsArray}
-        passFormikSubmitUP={getFormikSubmit}
-      />
+      <Spin
+        spinning={categoriesQuery.isLoading || sourcesQuery.isLoading}
+      ></Spin>
+      {categoriesQuery.isError || sourcesQuery.isError ? (
+        <p>something went wrong</p>
+      ) : (
+        categoriesQuery.status === "success" &&
+        sourcesQuery.status === "success" && (
+          <SearchForm
+            handleSubmit={handleFormSubmit}
+            formState={initialValues}
+            avfilters={availableFilters}
+            customActionsOnChange={customActionsOnChange}
+            categories={categoriesQuery.data}
+            sources={sourcesQuery.data}
+            sentiments={sentimentsArray}
+            passFormikSubmitUP={getFormikSubmit}
+          />
+        )
+      )}
     </Modal>
   );
 };
